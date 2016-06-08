@@ -4,7 +4,7 @@ import datetime
 import zipfile
 import tempfile
 import os.path
-from .config import get_logger  ### logging.basicConfig not work within Python Notebook
+from .logconfig import get_logger  ### logging.basicConfig not work within Python Notebook
 
 FTP_ADDR = "ftp.sec.gov"
 EDGAR_PREFIX = "ftp://%s/" % FTP_ADDR
@@ -26,7 +26,7 @@ def quarterly_file_list(from_year=1993, to_year=CURRENT_YEAR ):
     since 1993 until the specified to_year.
     If the to_year is null or current year, then down all the files until previous quarter of this year.
     """
-    logger.debug("Generating quarter files from the Year %s to the Year %s"  % (from_year, to_year))
+    logger.info("Generating quarter files from the Year %s to the Year %s"  % (from_year, to_year))
     years = range(from_year, to_year +1)
     quarters = ["QTR1", "QTR2", "QTR3", "QTR4"]
     history =  list((y, q) for y in years for q in quarters)
@@ -53,15 +53,28 @@ def daily_file_list(from_date, to_date=current_day ):
     The to_date is excluded. Default to_date is current day
     from_date and to_date format: yyyymmdd
     """
-    logger.debug("Generating daily files from the Date %s to the Date before %s." % (from_date, to_date))
-    dates = range(from_date, to_date)
-    return ["edgar/daily-index/master.%s.idx" % x for x in dates]
+    logger.info("Generating daily files from the Date %s to the Date before %s." % (from_date, to_date))
+  
+    fromyear = int(from_date/10000)
+    toyear = int(to_date/10000)
+    
+    years = range( fromyear, toyear+1)
+    months = range(1, 13)
+    days = range (1, 32)  
+    ymd_list = list(y*10000 + m * 100 + d  for y in years for m in months for d in days)
+   
+    ymd_match =[]
+    for ymd in ymd_list:
+        if ymd in range (20160525, 20160605):
+            ymd_match.append(ymd)
+        
+    return ["edgar/daily-index/master.%s.idx" % x for x in ymd_match]
 
 
 def ftp_retr(ftp, filename, buffer):
     """ Write remote filename's bytes from ftp to local buffer """
     ftp.retrbinary('RETR %s' % filename, buffer.write)
-    #logger.debug("FTP RETR %s" % filename)
+    #logger.info("FTP RETR %s" % filename)
     return buffer
 
 
@@ -92,7 +105,7 @@ def download_daily_index(ftp, file, dest):
     """
     dest = os.path.normpath(dest) #Make path name works both for Window or Unix format	
 
-    logger.debug("downloading %s file in %s" % (file, dest))
+    logger.info("downloading %s file in %s" % (file, dest))
 
     if file.startswith(EDGAR_PREFIX):
         file = file[len(EDGAR_PREFIX):]
@@ -109,9 +122,9 @@ def download_daily_index(ftp, file, dest):
             tmp.seek(0, 1) #reset 
             with open(full_dest, 'w') as idxfile:
                 idxfile.write(tmp.read().decode('utf-8'))
-            logger.debug("wrote %s" % full_dest)
+            logger.info("wrote %s" % full_dest)
         except Exception as e:
-            logger.debug ("Error in downloading the file: %s. Error msg: %s" %(file,e))
+            logger.error ("Error in downloading the file: %s. Error msg: %s" %(file,e))
 
 def download_quarter_index(ftp, file, dest):
     """
@@ -120,7 +133,7 @@ def download_quarter_index(ftp, file, dest):
     """
     dest = os.path.normpath(dest) #Make path name works both for Window or Unix format	
 
-    logger.debug("downloading %s file in %s" % (file, dest))
+    logger.info("downloading %s file in %s" % (file, dest))
 
     if file.startswith(EDGAR_PREFIX):
         file = file[len(EDGAR_PREFIX):]
@@ -136,9 +149,9 @@ def download_quarter_index(ftp, file, dest):
                     z.readline()
                 with open(full_dest, 'w') as idxfile:
                     idxfile.write(z.read().decode('utf-8'))
-            logger.debug("wrote %s" % full_dest)
+            logger.info("wrote %s" % full_dest)
         except Exception as e:
-            logger.debug( "Error in downloading the file: %s. Error msg: %s" %(file,e))
+            logger.error( "Error in downloading the file: %s. Error msg: %s" %(file,e))
 
 def download_data_file(ftp, file, dest):
     """
@@ -146,7 +159,7 @@ def download_data_file(ftp, file, dest):
     """
     dest = os.path.normpath(dest) #Make path name works both for Window or Unix format	
 
-    logger.debug("    downloading %s file in %s" % (file, dest))
+    logger.info("    downloading %s file in %s" % (file, dest))
 
     if file.startswith(EDGAR_PREFIX):
         file = file[len(EDGAR_PREFIX):]
@@ -160,6 +173,6 @@ def download_data_file(ftp, file, dest):
             tmp.seek(0) 
             with open(full_dest, 'w') as idxfile:
                 idxfile.write(tmp.read().decode('utf-8'))
-            logger.debug("wrote %s" % full_dest)
+            logger.info("wrote %s" % full_dest)
         except Exception as e:
-            logger.debug("Error in downloading the file: %s. Error msg: %s" %(file,e))
+            logger.error("Error in downloading the file: %s. Error msg: %s" %(file,e))

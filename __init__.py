@@ -7,22 +7,3 @@ from .post_parser_data_file import post_parser_13F_txt_file
 from .web_scrap_fidelity_cusip_lookup import  *
 from .web_scrap_yahoo_finance import  *
 from .sec_13f_data_analysis import *
-
-"""
-find . -name "*.pyc" -exec rm -rf {} \;
-
-import edgar
-import ftplib
-ftp = ftplib.FTP(edgar.FTP_ADDR)
-ftp.login()
-try:
-	edgar.download_all(ftp, "/tmp")
-except Exception as e:
-	print e
-finally:
-	ftp.close()
-
-import glob
-for idx in glob.glob("/tmp/*.idx"):
-	print idx
-"""

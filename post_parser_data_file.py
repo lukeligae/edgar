@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import datetime
 import re
-from .config import get_logger  ### logging.basicConfig not work within Python Notebook
+from .logconfig import get_logger  ### logging.basicConfig not work within Python Notebook
 from .data_file_parser import  save_df
 
 current_day = datetime.datetime.now().strftime("%Y%m%d") ## strftime("%Y-%m-%d %H:%M:%S")
@@ -23,8 +23,8 @@ def post_parser_13F_txt_file (data_file_dir, data_file_name ):
 
     df_orig_13f = pd.read_csv(data_file_path_name, delimiter='|', header=-1) # if header =0 , will moss the 1st record.
 
-    logger.debug("Processing the the file %s  ........" % data_file_path_name)
-    logger.debug("    There are %s records in the file." % str(len(df_orig_13f)))
+    logger.info("Processing the the file %s  ........" % data_file_path_name)
+    logger.info("    There are %s records in the file." % str(len(df_orig_13f)))
 
     #In the 13F holding lines file, usually Col2 = Issuer_Name, Col3=Class_Title, Col4=CUSIP, Col5= Value_Amt, Col6=Share_Qty, Col7=Share_Type
     #The rest Col7-Col10 are not important. Col13-Col23 should be empty.
@@ -75,7 +75,7 @@ def post_parser_13F_txt_file (data_file_dir, data_file_name ):
     save_df (df_final_good_rows, 'SEC_13F_TXT_Filing_Holding_Lines_Processed_Good', data_file_dir)
     save_df (df_final_bad_rows,   'SEC_13F_TXT_Filing_Holding_Lines_Processed_Bad', data_file_dir)
 
-    logger.debug("    There are %s GOOD records and  %s BAD records saved." %(str(len(df_final_good_rows)) ,  str(len(df_final_bad_rows)) )  )
+    logger.info("    There are %s GOOD records and  %s BAD records saved." %(str(len(df_final_good_rows)) ,  str(len(df_final_bad_rows)) )  )
 
 
 

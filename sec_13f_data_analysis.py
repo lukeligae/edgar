@@ -1,12 +1,14 @@
 import pandas as pd
 import numpy as np
+import datetime
 from sqlalchemy import create_engine
 import matplotlib.pyplot as plt
 
-from .config import get_logger  ### logging.basicConfig not work within Python Notebook
+from .logconfig import get_logger  ### logging.basicConfig not work within Python Notebook
 
-log_file_name = "SEC_13F_Data_Analysis.log"
-logger = get_logger('data',log_file_name)
+#current_day = datetime.datetime.now().strftime("%Y%m%d") ## strftime("%Y-%m-%d %H:%M:%S") 
+#log_file_name =  "sec_13f_data_analysis_" + current_day + ".log" 
+#logger = get_logger('13f_data',log_file_name)
 
 """
 
@@ -38,11 +40,11 @@ def top_n_cusip_analysis (df_cik_id_name, df_data_all_cik, top_n = 5, previous_p
         df_data_cik_last = df_data_cik [df_data_cik.calendar_period ==period]
 
 
-        top_cusip = df_data_cik_last.sort(columns = "amt_pct", ascending=False)[["cusip", "amt_pct"]].head(top_n)
+        top_cusip = df_data_cik_last.sort_values(by = "amt_pct", ascending=False)[["cusip", "amt_pct"]].head(top_n)
         df_data_cik_top = df_data_cik[df_data_cik.cusip.isin(top_cusip.cusip)]
 
         print(fig_title + "  as of: "+str(period))
-        df_data_cik_last_top = df_data_cik_top[df_data_cik_top.calendar_period ==period].sort(columns = "amt_pct", ascending=False) [['cusip','symbol', 'share_qty', 'value_amt', 'amt_pct' ]]
+        df_data_cik_last_top = df_data_cik_top[df_data_cik_top.calendar_period ==period].sort_values(by= "amt_pct", ascending=False) [['cusip','symbol', 'share_qty', 'value_amt', 'amt_pct' ]]
         print(df_data_cik_last_top)
         print("\n")
 
